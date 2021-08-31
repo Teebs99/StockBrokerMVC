@@ -1,0 +1,136 @@
+﻿@model Models.PortfolioDetail
+
+@{
+    ViewBag.Title = "Details";
+}
+
+
+<h2>Portfolio Breakdown</h2>
+
+<div>
+    
+
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Value)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Value)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Cash)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Cash)
+        </dd>
+        <dd>
+            <button type="button" class="btn btn-success">@Html.ActionLink("Deposit Money", "Edit", new { id = Model.Id }, new { id = Model.Id, style = "color: white" }) </button>   <button type="button" class="btn btn-primary">@Html.ActionLink("Create Order", "Create", "Order", null, new { style = "color: white" })</button>
+        </dd>
+
+
+
+
+    </dl>
+</div>
+<hr />
+<h3>Positions</h3>
+<table class="table">
+    <tr>
+        <th>
+            Stock
+        </th>
+        <th>
+            Number Of Units
+        </th>
+        <th>
+            Value
+        </th>
+        <th></th>
+    </tr>
+
+    @{
+        Dictionary<string, (int, double)> filledOrders = new Dictionary<string, (int, double)>();
+        foreach (var item in Model.Orders.Where(o => o.PortfolioId == Model.Id))
+        {
+            if (!filledOrders.ContainsKey(item.TickerSymbol))
+            {
+                filledOrders.Add(item.TickerSymbol, (item.NumberOfUnits, item.Price));
+            }
+            else
+            {
+                if (item.OrderType == Data.OrderType.Buy)
+                {
+                    filledOrders[item.TickerSymbol] = (filledOrders[item.TickerSymbol].Item1 + item.NumberOfUnits, item.Price);
+                }
+                else if (item.OrderType == Data.OrderType.Sell)
+                {
+                    filledOrders[item.TickerSymbol] = (filledOrders[item.TickerSymbol].Item1 - item.NumberOfUnits, item.Price);
+                }
+
+            }
+        }
+        foreach (var item in filledOrders)
+        {
+        <tr>
+
+            <td>
+                @Html.DisplayFor(modelItem => item.Key)
+            </td>
+
+            <td>
+                @Html.DisplayFor(modelItem => item.Value.Item1)
+            </td>
+
+            <td>
+                @{double value = item.Value.Item1 * item.Value.Item2; }
+                @value
+            </td>
+
+        </tr>
+        }
+    }
+</table>
+<hr />
+
+<h3>Orders</h3>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(modelItem => Model.Orders[0].TickerSymbol)
+        </th>
+        <th>
+            @Html.DisplayNameFor(modelItem => Model.Orders[0].NumberOfUnits)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => Model.Orders[0].IsFilled)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var order in Model.Orders.Where(o => o.PortfolioId == Model.Id))
+    {
+        <tr>
+
+            <td>
+                @Html.ActionLink(order.TickerSymbol, "Details", "Order", new { id = order.OrderId }, null)
+            </td>
+
+            <td>
+                @Html.DisplayFor(modelItem => order.NumberOfUnits)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => order.IsFilled)
+            </td>
+        </tr>
+    }
+</table>
+
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>
+
