@@ -53,7 +53,7 @@
 
     @{
         Dictionary<string, (int, double)> filledOrders = new Dictionary<string, (int, double)>();
-        foreach (var item in Model.Orders.Where(o => o.PortfolioId == Model.Id))
+        foreach (var item in Model.Orders.Where(o => o.PortfolioId == Model.Id && o.IsFilled))
         {
             if (!filledOrders.ContainsKey(item.TickerSymbol))
             {
